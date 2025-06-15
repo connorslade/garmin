@@ -1,7 +1,73 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="24" height="24" fill="#000000"/>
-<path d="M3 4C3 3.44772 3.44772 3 4 3H10C10.5523 3 11 3.44772 11 4V10C11 10.5523 10.5523 11 10 11H4C3.44772 11 3 10.5523 3 10V4Z" fill="#F4F4F4"/>
-<path d="M3 14C3 13.4477 3.44772 13 4 13H10C10.5523 13 11 13.4477 11 14V20C11 20.5523 10.5523 21 10 21H4C3.44772 21 3 20.5523 3 20V14Z" fill="#F4F4F4"/>
-<path d="M13 4C13 3.44772 13.4477 3 14 3H20C20.5523 3 21 3.44772 21 4V10C21 10.5523 20.5523 11 20 11H14C13.4477 11 13 10.5523 13 10V4Z" fill="#F4F4F4"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M14.3 14.3V19.7H19.7V14.3H14.3ZM14 13C13.4477 13 13 13.4477 13 14V20C13 20.5523 13.4477 21 14 21H20C20.5523 21 21 20.5523 21 20V14C21 13.4477 20.5523 13 20 13H14Z" fill="#F4F4F4"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Layer_1"
+   viewBox="0 0 525.00001 524.99998"
+   version="1.1"
+   sodipodi:docname="launcher_icon.svg"
+   width="525"
+   height="525"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview9"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.4631692"
+     inkscape:cx="701.68742"
+     inkscape:cy="385.38832"
+     inkscape:window-width="1436"
+     inkscape:window-height="901"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Layer_1" />
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+            .cls-1 {
+            fill: #ffffff;
+            }
+
+            .cls-2 {
+            fill: #052a56;
+            }
+
+            .cls-3 {
+            fill: #fcd638;
+            stroke-width: 40px;
+            stroke: #fcd638;
+            }
+        </style>
+  </defs>
+  <circle
+     class="cls-3"
+     cx="262.5"
+     cy="262.5"
+     r="220"
+     id="circle1" />
+  <g
+     transform="matrix(0.95,0,0,0.95,14.16525,-5.5045)"
+     id="g3">
+    <path
+       class="cls-2"
+       d="m 119.95,282.11 c 0,-78.13 63.33,-141.46 141.46,-141.46 41.13,0 78.15,17.56 104,45.58 l 53.18,-53.18 C 379.12,91.44 323.3,65.48 261.41,65.48 141.77,65.48 44.79,162.46 44.79,282.1 c 0,61.88 25.95,117.7 67.57,157.18 l 53.18,-53.18 c -28.02,-25.85 -45.58,-62.87 -45.58,-104 z"
+       id="path1" />
+    <path
+       class="cls-3"
+       d="m 165.53,386.11 -53.18,53.18 c 4.35,4.13 8.88,8.07 13.57,11.83 l 53.63,-53.63 c -4.92,-3.49 -9.59,-7.3 -14.02,-11.38 z"
+       id="path2" />
+    <path
+       class="cls-2"
+       d="m 312.68,264.37 -73.74,73.74 h 152.4 c -21.69,50.27 -71.7,85.47 -129.94,85.47 -30.5,0 -58.75,-9.66 -81.86,-26.08 l -53.63,53.63 c 37.1,29.78 84.21,47.61 135.49,47.61 119.64,0 216.62,-96.98 216.62,-216.62 0,-5.98 -0.25,-11.89 -0.73,-17.75 H 312.67 Z"
+       id="path3" />
+  </g>
 </svg>

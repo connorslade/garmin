@@ -2,7 +2,7 @@ import Toybox.Graphics;
 import Toybox.WatchUi;
 
 (:glance)
-class GarminGenesisGlance extends WatchUi.GlanceView {
+class Glance extends WatchUi.GlanceView {
     var schedule;
 
     function initialize(schedule as Schedule) {
@@ -15,7 +15,7 @@ class GarminGenesisGlance extends WatchUi.GlanceView {
 
         var text = "";
 
-        self.schedule.updateIfNeeded();
+        self.schedule.updateIfNeeded(false);
         if (self.schedule.isLoading()) {
             text = "Loading...";
             requestUpdate();

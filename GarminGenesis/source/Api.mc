@@ -9,7 +9,7 @@ class Schedule {
     var lastUpdate as Number = 0;
 
     function initialize() {}
-    
+
     function update() as Void {
         var url = "https://widget.connorcode.com/api/schedule/bWagb5zdDR";
         Communications.makeWebRequest(url, {}, {
@@ -18,9 +18,9 @@ class Schedule {
         }, method(:onReceive));
     }
 
-    function updateIfNeeded() as Void {
+    function updateIfNeeded(firstLoad as Boolean) as Void {
         var timeout = 1000 * 60 * 15;
-        if (System.getTimer() - self.lastUpdate > timeout) {
+        if ((self.isLoading() && firstLoad) || System.getTimer() - self.lastUpdate > timeout) {
             self.update();
         }
     }
@@ -75,6 +75,41 @@ class Schedule {
 
         self.lastUpdate = System.getTimer();
     }
+
+    function serialize() as Dictionary | Null {
+        if (self.isLoading()) {
+            return null;
+        }
+
+        var schedule = new Dictionary[self.classes.size()];
+        for (var i = 0; i < classes.size(); i++) {
+            schedule[i] = self.classes[i].serialize();
+        }
+
+        return {
+            "classes" => schedule,
+            "message" => self.message,
+            "lastUpdate" => self.lastUpdate
+        };
+    }
+
+    static function deserialize(data as Dictionary | Null) as Schedule {
+        var out = new Schedule();
+        if (data == null) { return out; }
+
+        out.lastUpdate = data["lastUpdate"] as Number;
+        out.message = data["message"] as String | Null;
+
+        var classesData = data["classes"] as Array | Null;
+        if (classesData != null) {
+            out.classes = new Class[classesData.size()];
+            for (var i = 0; i < classesData.size(); i++) {
+                out.classes[i] = Class.deserialize(classesData[i] as Dictionary);
+            }
+        }
+
+        return out;
+    }
 }
 
 (:glance)
@@ -89,6 +124,24 @@ class Class {
         self.teacher = teacher;
         self.start = start;
         self.end = end;
+    }
+
+    function serialize() as Dictionary {
+        return {
+            "name" => self.name,
+            "teacher" => self.teacher,
+            "start" => self.start.serialize(),
+            "end" => self.end.serialize()
+        };
+    }
+
+    static function deserialize(data as Dictionary) as Class {
+        return new Class(
+            data["name"],
+            data["teacher"],
+            Time.deserialize(data["start"]),
+            Time.deserialize(data["end"])
+        );
     }
 }
 
@@ -140,5 +193,16 @@ class Time {
 
     function toString() as String {
         return self.hour.format("%02d") + ":" + self.minute.format("%02d");
+    }
+
+    function serialize() as Dictionary {
+        return {
+            "hour" => self.hour,
+            "minute" => self.minute
+        };
+    }
+
+    static function deserialize(data as Dictionary) as Time {
+        return new Time(data["hour"], data["minute"]);
     }
 }
