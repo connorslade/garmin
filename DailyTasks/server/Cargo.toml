@@ -1,0 +1,13 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+afire = { git = "https://github.com/connorslade/afire", branch = "dev" }
+anyhow = "1.0.98"
+chrono = "0.4.41"
+dotenv = "0.15.0"
+markdown = "1.0.0"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
