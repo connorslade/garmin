@@ -1,7 +1,7 @@
 import Toybox.Graphics;
 import Toybox.WatchUi;
 
-class DailyTasksView extends WatchUi.View {
+class View extends WatchUi.View {
 
     function initialize() {
         View.initialize();
