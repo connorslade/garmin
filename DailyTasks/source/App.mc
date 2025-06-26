@@ -11,13 +11,14 @@ class App extends Application.AppBase {
     }
 
     function onStart(state as Dictionary?) as Void {
-        self.api.update();
+        self.api.fetchMonth(2025, 6);
     }
 
     function onStop(state as Dictionary?) as Void { }
 
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        return [ new View() ];
+        var view = new View(self.api);
+        return [ view, new Events(view) ];
     }
 
 }

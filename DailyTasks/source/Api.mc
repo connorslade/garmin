@@ -2,23 +2,45 @@ import Toybox.Lang;
 import Toybox.Communications;
 import Toybox.System;
 
-class Api {
-    function initialize() {}
+const BASE_URL as String = "https://localhost";
 
-    function update() as Void {
-        var url = "http://127.0.0.1:8080/api/private/tasks/today";
+class Api {
+    var tasks as Dictionary<Date, Array<Task>>;
+
+    function initialize() {
+        tasks = {};
+    }
+
+    function fetchMonth(year as Number, month as Number) as Void {
+        var url = BASE_URL + "/api/private/tasks/" + year + "/" + month.format("%02d");
         Communications.makeWebRequest(url, {}, {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
             :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON
         }, method(:onReceive));
     }
 
-    function onReceive(responseCode as Lang.Number, data as Lang.Dictionary | Null) as Void {
-        System.println(responseCode);
-        System.println(data);
+    function onReceive(responseCode as Number, data as Dictionary | Null) as Void {
         if (responseCode != 200 || data == null) {
             return;
         }
 
+        var days = data.keys();
+        for (var i = 0; i < days.size(); i++) {
+            var day = days[i] as String;
+            var arr = new Task[data[day].size()];
+            for (var j = 0; j < arr.size(); j++) {
+                arr[j] = Task.deserialize(data[day][j]);
+            }
+
+            var date = Date.fromString(day);
+            self.tasks.put(date, arr);
+        }
+
+        WatchUi.requestUpdate();
+    }
+
+    function getDays() as Array<Date> {
+        // todo: sort
+        return self.tasks.keys();
     }
 }
