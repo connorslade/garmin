@@ -11,6 +11,16 @@ class Task {
         self.children = children;
     }
 
+    function count() as Number {
+        var out = 1;
+
+        for (var i = 0; i < self.children.size(); i++) {
+            out += self.children[i].count();
+        }
+
+        return out;
+    }
+
     function serialize() as Dictionary {
         var children = new Dictionary[self.children.size()];
         for (var i = 0; i < children.size(); i++) {
@@ -86,5 +96,11 @@ class Date {
         var day = str.substring(mdSeparator + 1, null).toNumber();
 
         return new Date(year, month, day);
+    }
+}
+
+class DateComparator {
+    function compare(a as Lang.Object, b as Lang.Object) as Number {
+        return (b as Date).compareTo(a as Date);
     }
 }

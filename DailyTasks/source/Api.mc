@@ -40,7 +40,20 @@ class Api {
     }
 
     function getDays() as Array<Date> {
-        // todo: sort
-        return self.tasks.keys();
+        var days = self.tasks.keys();
+        days.sort(new DateComparator());
+        return days;
+    }
+
+    function count(date as Date) as Number {
+        var out = 0;
+        if (!self.tasks.hasKey(date)) { return out; }
+
+        var tasks = self.tasks[date];
+        for (var i = 0; i < tasks.size(); i++) {
+            out += tasks[i].count();
+        }
+
+        return out;
     }
 }
