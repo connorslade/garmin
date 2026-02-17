@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{
-    Json,
+    Form,
     extract::{Path, State},
 };
 use serde::Deserialize;
@@ -16,7 +16,7 @@ pub struct Body {
 pub async fn post(
     State(app): State<Arc<App>>,
     Path(id): Path<String>,
-    Json(body): Json<Body>,
+    Form(body): Form<Body>,
 ) -> AnyResult<()> {
     app.request::<()>(&format!("/rest/nodes/{id}/cmd/DON/{}", body.value))
         .await?;
