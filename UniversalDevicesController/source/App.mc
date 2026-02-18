@@ -28,7 +28,7 @@ class App extends Application.AppBase {
                     ? Rez.Drawables.LightOn
                     : Rez.Drawables.LightOff,
                 :locX => WatchUi.LAYOUT_HALIGN_CENTER,
-                :locY => WatchUi.LAYOUT_VALIGN_CENTER
+                :locY => WatchUi.LAYOUT_VALIGN_CENTER,
             });
             self.menu.addItem(
                 new WatchUi.IconMenuItem(device.name, desc, i, icon, {})
@@ -67,30 +67,29 @@ class MenuInputDelegate extends WatchUi.Menu2InputDelegate {
     }
 
     function onSelect(item) {
-        var deviceIndex = item.getId() as Number;
-        var device = self.devices.get(deviceIndex);
+        var device = self.devices.get(item.getId() as Number);
         var menu = new WatchUi.ActionMenu({
             :theme => WatchUi.ACTION_MENU_THEME_DARK,
         });
 
         var label = device.isOn() ? "Turn Off" : "Turn On";
-        menu.addItem(new ActionMenuItem({ :label => label }, 0));
+        menu.addItem(
+            new ActionMenuItem({ :label => label }, device.isOn() ? 0 : 1)
+        );
         menu.addItem(new ActionMenuItem({ :label => "Set Brightness" }, 2));
         // menu.addItem(new ActionMenuItem({ :label => "Move to Top" }, 3));
 
-        var delegate = new ActionMenuDelegate(self.devices, deviceIndex);
+        var delegate = new ActionMenuDelegate(device);
         WatchUi.showActionMenu(menu, delegate);
     }
 }
 
 class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
-    var devices as Devices;
-    var deviceIndex as Number;
+    var device as DeviceRef;
 
-    function initialize(devices as Devices, deviceIndex as Number) {
+    function initialize(device as DeviceRef) {
         ActionMenuDelegate.initialize();
-        self.devices = devices;
-        self.deviceIndex = deviceIndex;
+        self.device = device;
     }
 
     function onBack() as Void {}
@@ -98,16 +97,13 @@ class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
     function onSelect(item as ActionMenuItem) as Void {
         switch (item.getId()) {
             case 0:
-                self.devices.setDevice(self.deviceIndex, 0);
+                self.device.setValue(0);
                 break;
             case 1:
-                self.devices.setDevice(self.deviceIndex, 255);
+                self.device.setValue(255);
                 break;
             case 2:
-                var start =
-                    (self.devices.get(self.deviceIndex).value.toFloat() /
-                        255.0) *
-                    100.0;
+                var start = (self.device.value().toFloat() / 255.0) * 100.0;
                 var picker = new WatchUi.Picker({
                     :title => centerText("Brightness", Graphics.FONT_SMALL),
                     :pattern => [
@@ -116,7 +112,7 @@ class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
                 });
                 WatchUi.pushView(
                     picker,
-                    new BrightnessPickerDelegate(self),
+                    new BrightnessPickerDelegate(self.device),
                     WatchUi.SLIDE_LEFT
                 );
                 break;
@@ -154,19 +150,16 @@ class PercentPickerFactory extends WatchUi.PickerFactory {
 }
 
 class BrightnessPickerDelegate extends WatchUi.PickerDelegate {
-    var actionMenu as ActionMenuDelegate;
+    var device as DeviceRef;
 
-    function initialize(actionMenu as ActionMenuDelegate) {
+    function initialize(device as DeviceRef) {
         PickerDelegate.initialize();
-        self.actionMenu = actionMenu;
+        self.device = device;
     }
 
     function onAccept(values as Array) as Boolean {
         var brightness = (values[0].toFloat() / 100.0) * 255.0;
-        self.actionMenu.devices.setDevice(
-            self.actionMenu.deviceIndex,
-            brightness.toNumber()
-        );
+        self.device.setValue(brightness.toNumber());
         WatchUi.popView(WatchUi.SLIDE_RIGHT);
         return true;
     }

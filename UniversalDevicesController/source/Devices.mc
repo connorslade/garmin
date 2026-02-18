@@ -16,8 +16,19 @@ class Devices {
         return self.devices.size();
     }
 
-    function get(index as Number) as Device {
-        return self.devices[index];
+    function get(index as Number) as DeviceRef {
+        return new DeviceRef(self, index);
+    }
+
+    function getByAddress(address as String) as Device? {
+        for (var i = 0; i < self.devices.size(); i++) {
+            var device = self.devices[i];
+            if (device.address == address) {
+                return device;
+            }
+        }
+
+        return null;
     }
 
     function update() as Void {
@@ -49,8 +60,7 @@ class Devices {
         self.callback.invoke();
     }
 
-    function setDevice(index as Number, value as Number) as Void {
-        var device = self.devices[index];
+    function setDevice(device as Device, value as Number) as Void {
         device.value = value;
         Communications.makeWebRequest(
             BASE_URL + "/device/" + Communications.encodeURL(device.address),
@@ -88,5 +98,39 @@ class Device {
 
     function isOn() as Boolean {
         return self.value != 0;
+    }
+}
+
+class DeviceRef {
+    var devices as Devices;
+    var address as String;
+
+    function initialize(devices as Devices, deviceIndex as Number) {
+        self.devices = devices;
+        self.address = devices.devices[deviceIndex].address;
+    }
+
+    function get() as Device? {
+        return self.devices.getByAddress(self.address);
+    }
+
+    function value() as Number {
+        var device = self.get();
+        if (device != null) {
+            return self.get().value;
+        }
+        return 0;
+    }
+
+    function isOn() as Boolean {
+        var device = self.get();
+        return device != null && device.value != 0;
+    }
+
+    function setValue(value as Number) {
+        var device = self.get();
+        if (device != null) {
+            self.devices.setDevice(device, value);
+        }
     }
 }
