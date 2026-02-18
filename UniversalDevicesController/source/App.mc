@@ -18,13 +18,20 @@ class App extends Application.AppBase {
 
         for (var i = 0; i < self.devices.count(); i++) {
             var device = self.devices.get(i);
-            var percent = ((device.value.toFloat() / 255.0) * 100.0).toNumber();
-            var desc = device.value == 0 ? "Off" : "On - " + percent + "%";
+            var percent =
+                Math.round((device.value.toFloat() / 255.0) * 10.0) * 10;
+            var desc =
+                device.value == 0 ? "Off" : "On - " + percent.toNumber() + "%";
 
+            var icon = new WatchUi.Bitmap({
+                :rezId => device.isOn()
+                    ? Rez.Drawables.LightOn
+                    : Rez.Drawables.LightOff,
+                :locX => WatchUi.LAYOUT_HALIGN_CENTER,
+                :locY => WatchUi.LAYOUT_VALIGN_CENTER
+            });
             self.menu.addItem(
-                new WatchUi.MenuItem(device.name, desc, i, {
-                    :icon => Rez.Drawables.LightOff,
-                })
+                new WatchUi.IconMenuItem(device.name, desc, i, icon, {})
             );
         }
 
@@ -66,12 +73,8 @@ class MenuInputDelegate extends WatchUi.Menu2InputDelegate {
             :theme => WatchUi.ACTION_MENU_THEME_DARK,
         });
 
-        if (device.isOn()) {
-            menu.addItem(new ActionMenuItem({ :label => "Turn Off" }, 0));
-        } else {
-            menu.addItem(new ActionMenuItem({ :label => "Turn On" }, 1));
-        }
-
+        var label = device.isOn() ? "Turn Off" : "Turn On";
+        menu.addItem(new ActionMenuItem({ :label => label }, 0));
         menu.addItem(new ActionMenuItem({ :label => "Set Brightness" }, 2));
         // menu.addItem(new ActionMenuItem({ :label => "Move to Top" }, 3));
 
@@ -121,24 +124,6 @@ class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
                 break;
         }
         WatchUi.requestUpdate();
-    }
-}
-
-function centerText(text, size) as WatchUi.Text {
-    return new WatchUi.Text({
-        :text => text,
-        :color => Graphics.COLOR_WHITE,
-        :font => size,
-        :locX => WatchUi.LAYOUT_HALIGN_CENTER,
-        :locY => WatchUi.LAYOUT_VALIGN_CENTER,
-    });
-}
-
-function min(a, b) {
-    if (a < b) {
-        return a;
-    } else {
-        return b;
     }
 }
 
