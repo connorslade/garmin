@@ -1,4 +1,5 @@
 import Toybox.Application;
+import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.WatchUi;
 
@@ -13,14 +14,12 @@ class App extends Application.AppBase {
     });
 
     function deviceUpdate() {
+        while (self.menu.deleteItem(0)) {}
+
         for (var i = 0; i < self.devices.count(); i++) {
             var device = self.devices.get(i);
             var percent = ((device.value.toFloat() / 255.0) * 100.0).toNumber();
             var desc = device.value == 0 ? "Off" : "On - " + percent + "%";
-
-            if (menuUpdated) {
-                self.menu.deleteItem(0);
-            }
 
             self.menu.addItem(
                 new WatchUi.MenuItem(device.name, desc, i, {
@@ -74,14 +73,14 @@ class MenuInputDelegate extends WatchUi.Menu2InputDelegate {
         }
 
         menu.addItem(new ActionMenuItem({ :label => "Set Brightness" }, 2));
-        menu.addItem(new ActionMenuItem({ :label => "Move to Top" }, 3));
+        // menu.addItem(new ActionMenuItem({ :label => "Move to Top" }, 3));
 
-        var delegate = new MyActionMenuDelegate(self.devices, deviceIndex);
+        var delegate = new ActionMenuDelegate(self.devices, deviceIndex);
         WatchUi.showActionMenu(menu, delegate);
     }
 }
 
-class MyActionMenuDelegate extends WatchUi.ActionMenuDelegate {
+class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
     var devices as Devices;
     var deviceIndex as Number;
 
@@ -101,9 +100,98 @@ class MyActionMenuDelegate extends WatchUi.ActionMenuDelegate {
             case 1:
                 self.devices.setDevice(self.deviceIndex, 255);
                 break;
+            case 2:
+                var start =
+                    (self.devices.get(self.deviceIndex).value.toFloat() /
+                        255.0) *
+                    100.0;
+                var picker = new WatchUi.Picker({
+                    :title => centerText("Brightness", Graphics.FONT_SMALL),
+                    :pattern => [
+                        new PercentPickerFactory(start.toNumber(), 10),
+                    ],
+                });
+                WatchUi.pushView(
+                    picker,
+                    new BrightnessPickerDelegate(self),
+                    WatchUi.SLIDE_LEFT
+                );
+                break;
             default:
                 break;
         }
         WatchUi.requestUpdate();
+    }
+}
+
+function centerText(text, size) as WatchUi.Text {
+    return new WatchUi.Text({
+        :text => text,
+        :color => Graphics.COLOR_WHITE,
+        :font => size,
+        :locX => WatchUi.LAYOUT_HALIGN_CENTER,
+        :locY => WatchUi.LAYOUT_VALIGN_CENTER,
+    });
+}
+
+function min(a, b) {
+    if (a < b) {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+class PercentPickerFactory extends WatchUi.PickerFactory {
+    var offset as Number;
+    var step as Number;
+
+    function initialize(start as Number, step as Number) {
+        PickerFactory.initialize();
+        self.offset = start / step;
+        self.step = step;
+    }
+
+    function getDrawable(index as Number, isSelected as Boolean) {
+        return centerText(
+            self.getValue(index).toString() + "%",
+            Graphics.FONT_MEDIUM
+        );
+    }
+
+    function getSize() as Number {
+        return 100 / self.step + 1;
+    }
+
+    function getValue(index as Number) {
+        return min(((index + self.offset) % self.getSize()) * step, 100);
+    }
+}
+
+class BrightnessPickerDelegate extends WatchUi.PickerDelegate {
+    var actionMenu as ActionMenuDelegate;
+
+    function initialize(actionMenu as ActionMenuDelegate) {
+        PickerDelegate.initialize();
+        self.actionMenu = actionMenu;
+    }
+
+    function onAccept(values as Array) as Boolean {
+        var brightness = (values[0].toFloat() / 100.0) * 255.0;
+        self.actionMenu.devices.setDevice(
+            self.actionMenu.deviceIndex,
+            brightness.toNumber()
+        );
+        WatchUi.popView(WatchUi.SLIDE_RIGHT);
+        return true;
+    }
+
+    function onActionMenu() as Boolean {
+        return true;
+    }
+
+    function onCancel() as Boolean {
+        WatchUi.popView(WatchUi.SLIDE_RIGHT);
+        return true;
     }
 }
