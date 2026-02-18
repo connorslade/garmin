@@ -1107,7 +1107,6 @@ dependencies = [
  "serde",
  "serde-xml-rs",
  "tokio",
- "url",
 ]
 
 [[package]]

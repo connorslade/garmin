@@ -37,6 +37,7 @@ class Devices {
             {},
             {
                 :method => Communications.HTTP_REQUEST_METHOD_GET,
+                :headers => { "Authorization" => AUTHENTICATION },
                 :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
             },
             method(:onReceiveDevices)
@@ -64,12 +65,8 @@ class Devices {
         device.value = value;
         Communications.makeWebRequest(
             BASE_URL + "/device/" + Communications.encodeURL(device.address),
-            {
-                "value" => value,
-            },
-            {
-                :method => Communications.HTTP_REQUEST_METHOD_POST,
-            },
+            { "value" => value },
+            { :method => Communications.HTTP_REQUEST_METHOD_POST },
             method(:onReceiveSetDevice)
         );
         self.callback.invoke();

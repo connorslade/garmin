@@ -1,23 +1,31 @@
-import Toybox.Application;
-import Toybox.Graphics;
 import Toybox.Lang;
-import Toybox.WatchUi;
+using Toybox.Application;
+using Toybox.Graphics;
+using Toybox.WatchUi;
 
 class App extends Application.AppBase {
     var devices = new Devices(method(:deviceUpdate));
-    var favorites = new String [0];
+    var favorites = new Set();
+    var showAll = false;
 
     var menuUpdated = false;
     var menu = new WatchUi.Menu2({
         :title => "Devices",
+        :footer => "Loading...",
         :dividerType => WatchUi.Menu2.DIVIDER_TYPE_ICON,
     });
 
     function deviceUpdate() {
         while (self.menu.deleteItem(0)) {}
+        self.menu.setFooter(null);
 
         for (var i = 0; i < self.devices.count(); i++) {
             var device = self.devices.get(i);
+
+            if (!self.showAll && !self.favorites.contains(device.address)) {
+                continue;
+            }
+
             var percent =
                 Math.round((device.value.toFloat() / 255.0) * 10.0) * 10;
             var desc =
@@ -49,8 +57,9 @@ class App extends Application.AppBase {
 
     function onStop(state as Dictionary?) as Void {}
 
-    function getInitialView() as [Views] or [Views, InputDelegates] {
-        return [self.menu, new MenuInputDelegate(self.devices)];
+    function getInitialView() as [WatchUi.Views] or
+        [WatchUi.Views, WatchUi.InputDelegates] {
+        return [self.menu, new MenuInputDelegate(self)];
     }
 }
 
@@ -59,42 +68,65 @@ function getApp() as App {
 }
 
 class MenuInputDelegate extends WatchUi.Menu2InputDelegate {
-    var devices as Devices;
+    var app as App;
 
-    function initialize(devices as Devices) {
-        self.devices = devices;
+    function initialize(app as App) {
         Menu2InputDelegate.initialize();
+        self.app = app;
     }
 
     function onSelect(item) {
-        var device = self.devices.get(item.getId() as Number);
+        var device = self.app.devices.get(item.getId() as Number);
         var menu = new WatchUi.ActionMenu({
             :theme => WatchUi.ACTION_MENU_THEME_DARK,
         });
 
-        var label = device.isOn() ? "Turn Off" : "Turn On";
-        menu.addItem(
-            new ActionMenuItem({ :label => label }, device.isOn() ? 0 : 1)
-        );
-        menu.addItem(new ActionMenuItem({ :label => "Set Brightness" }, 2));
-        // menu.addItem(new ActionMenuItem({ :label => "Move to Top" }, 3));
+        if (device.isOn()) {
+            menu.addItem(new ActionMenuItem({ :label => "Turn Off" }, 0));
+        } else {
+            menu.addItem(new ActionMenuItem({ :label => "Turn On" }, 1));
+        }
 
-        var delegate = new ActionMenuDelegate(device);
+        menu.addItem(new ActionMenuItem({ :label => "Set Brightness" }, 2));
+
+        if (!self.app.favorites.contains(device.address)) {
+            menu.addItem(new ActionMenuItem({ :label => "Add Favorite" }, 3));
+        } else {
+            menu.addItem(
+                new ActionMenuItem({ :label => "Remove Favorite" }, 4)
+            );
+        }
+
+        var delegate = new ActionMenuDelegate(device, self.app.favorites);
         WatchUi.showActionMenu(menu, delegate);
+    }
+
+    function onWrap(key as WatchUi.Key) as Boolean {
+        if (key == WatchUi.KEY_DOWN) {
+            self.app.showAll = true;
+            return false;
+        } else if (key == WatchUi.KEY_UP) {
+            self.app.showAll = false;
+            return false;
+        }
+
+        return true;
     }
 }
 
 class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
     var device as DeviceRef;
+    var favorites as Set;
 
-    function initialize(device as DeviceRef) {
+    function initialize(device as DeviceRef, favorites as Set) {
         ActionMenuDelegate.initialize();
         self.device = device;
+        self.favorites = favorites;
     }
 
     function onBack() as Void {}
 
-    function onSelect(item as ActionMenuItem) as Void {
+    function onSelect(item as WatchUi.ActionMenuItem) as Void {
         switch (item.getId()) {
             case 0:
                 self.device.setValue(0);
@@ -115,6 +147,12 @@ class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
                     new BrightnessPickerDelegate(self.device),
                     WatchUi.SLIDE_LEFT
                 );
+                break;
+            case 3:
+                self.favorites.insert(self.device.address);
+                break;
+            case 4:
+                self.favorites.remove(self.device.address);
                 break;
             default:
                 break;
