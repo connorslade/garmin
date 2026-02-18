@@ -12,6 +12,14 @@ class Devices {
         self.callback = callback;
     }
 
+    function count() as Number {
+        return self.devices.size();
+    }
+
+    function get(index as Number) as Device {
+        return self.devices[index];
+    }
+
     function update() as Void {
         Communications.makeWebRequest(
             BASE_URL + "/devices",
@@ -54,6 +62,7 @@ class Devices {
             },
             method(:onReceiveSetDevice)
         );
+        self.callback.invoke();
     }
 
     function onReceiveSetDevice(
@@ -75,5 +84,9 @@ class Device {
 
     static function deserialize(data as Dictionary) as Device {
         return new Device(data["address"], data["name"], data["value"]);
+    }
+
+    function isOn() as Boolean {
+        return self.value != 0;
     }
 }
