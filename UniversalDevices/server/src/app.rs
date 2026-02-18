@@ -35,7 +35,13 @@ impl ControllerConfig {
 
 impl App {
     pub fn new(config: Config) -> Self {
-        Self { config, client: Client::new() }
+        Self {
+            config,
+            client: Client::builder()
+                .danger_accept_invalid_certs(true)
+                .build()
+                .unwrap(),
+        }
     }
 
     pub async fn request<'a, T: Deserialize<'a>>(&self, path: &str) -> Result<T> {
