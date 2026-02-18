@@ -34,6 +34,10 @@ impl ControllerConfig {
 }
 
 impl App {
+    pub fn new(config: Config) -> Self {
+        Self { config, client: Client::new() }
+    }
+
     pub async fn request<'a, T: Deserialize<'a>>(&self, path: &str) -> Result<T> {
         let url = self.config.controller.host.clone() + path;
         let auth = self.config.controller.auth();
