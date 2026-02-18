@@ -66,7 +66,10 @@ class Devices {
         Communications.makeWebRequest(
             BASE_URL + "/device/" + Communications.encodeURL(device.address),
             { "value" => value },
-            { :method => Communications.HTTP_REQUEST_METHOD_POST },
+            {
+                :method => Communications.HTTP_REQUEST_METHOD_POST,
+                :headers => { "Authorization" => AUTHENTICATION },
+            },
             method(:onReceiveSetDevice)
         );
         self.callback.invoke();
@@ -117,6 +120,15 @@ class DeviceRef {
             return self.get().value;
         }
         return 0;
+    }
+
+    function name() as String {
+        var device = self.get();
+        if (device != null) {
+            return device.name;
+        }
+
+        return "";
     }
 
     function isOn() as Boolean {

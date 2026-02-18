@@ -1,6 +1,7 @@
 import Toybox.Lang;
 using Toybox.Application;
 using Toybox.Graphics;
+using Toybox.Math;
 using Toybox.WatchUi;
 
 class App extends Application.AppBase {
@@ -16,20 +17,27 @@ class App extends Application.AppBase {
     });
 
     function deviceUpdate() {
-        while (self.menu.deleteItem(0)) {}
-        self.menu.setFooter(null);
+        if (self.showAll) {
+            self.menu.setFooter(null);
+        } else {
+            self.menu.setFooter("Show All");
+        }
 
+        while (self.menu.deleteItem(0)) {}
         for (var i = 0; i < self.devices.count(); i++) {
             var device = self.devices.get(i);
 
-            if (!self.showAll && !self.favorites.contains(device.address)) {
+            if (
+                self.favorites.size() > 0 &&
+                !self.showAll &&
+                !self.favorites.contains(device.address)
+            ) {
                 continue;
             }
 
-            var percent =
-                Math.round((device.value.toFloat() / 255.0) * 10.0) * 10;
-            var desc =
-                device.value == 0 ? "Off" : "On - " + percent.toNumber() + "%";
+            var value = device.value();
+            var percent = Math.round((value.toFloat() / 255.0) * 10.0) * 10.0;
+            var desc = value == 0 ? "Off" : "On - " + percent.toNumber() + "%";
 
             var icon = new WatchUi.Bitmap({
                 :rezId => device.isOn()
@@ -39,7 +47,7 @@ class App extends Application.AppBase {
                 :locY => WatchUi.LAYOUT_VALIGN_CENTER,
             });
             self.menu.addItem(
-                new WatchUi.IconMenuItem(device.name, desc, i, icon, {})
+                new WatchUi.IconMenuItem(device.name(), desc, i, icon, {})
             );
         }
 
@@ -52,10 +60,17 @@ class App extends Application.AppBase {
     }
 
     function onStart(state as Dictionary?) as Void {
+        var favorites = Storage.getValue("favorites");
+        if (favorites != null) {
+            self.favorites.inner = favorites;
+        }
+
         devices.update();
     }
 
-    function onStop(state as Dictionary?) as Void {}
+    function onStop(state as Dictionary?) as Void {
+        Storage.setValue("favorites", self.favorites.inner);
+    }
 
     function getInitialView() as [WatchUi.Views] or
         [WatchUi.Views, WatchUi.InputDelegates] {
@@ -97,16 +112,18 @@ class MenuInputDelegate extends WatchUi.Menu2InputDelegate {
             );
         }
 
-        var delegate = new ActionMenuDelegate(device, self.app.favorites);
+        var delegate = new ActionMenuDelegate(device, self.app);
         WatchUi.showActionMenu(menu, delegate);
     }
 
     function onWrap(key as WatchUi.Key) as Boolean {
         if (key == WatchUi.KEY_DOWN) {
             self.app.showAll = true;
+            self.app.deviceUpdate();
             return false;
         } else if (key == WatchUi.KEY_UP) {
             self.app.showAll = false;
+            self.app.deviceUpdate();
             return false;
         }
 
@@ -116,12 +133,12 @@ class MenuInputDelegate extends WatchUi.Menu2InputDelegate {
 
 class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
     var device as DeviceRef;
-    var favorites as Set;
+    var app as App;
 
-    function initialize(device as DeviceRef, favorites as Set) {
+    function initialize(device as DeviceRef, app as App) {
         ActionMenuDelegate.initialize();
         self.device = device;
-        self.favorites = favorites;
+        self.app = app;
     }
 
     function onBack() as Void {}
@@ -142,17 +159,16 @@ class ActionMenuDelegate extends WatchUi.ActionMenuDelegate {
                         new PercentPickerFactory(start.toNumber(), 10),
                     ],
                 });
-                WatchUi.pushView(
-                    picker,
-                    new BrightnessPickerDelegate(self.device),
-                    WatchUi.SLIDE_LEFT
-                );
+                var pickerDelegate = new BrightnessPickerDelegate(self.device);
+                WatchUi.pushView(picker, pickerDelegate, WatchUi.SLIDE_LEFT);
                 break;
             case 3:
-                self.favorites.insert(self.device.address);
+                self.app.favorites.insert(self.device.address);
+                self.app.deviceUpdate();
                 break;
             case 4:
-                self.favorites.remove(self.device.address);
+                self.app.favorites.remove(self.device.address);
+                self.app.deviceUpdate();
                 break;
             default:
                 break;

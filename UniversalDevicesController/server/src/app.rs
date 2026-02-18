@@ -11,7 +11,7 @@ pub struct App {
 #[derive(Deserialize)]
 pub struct Config {
     pub api: ApiConfig,
-    pub controller: ControllerConfig
+    pub controller: ControllerConfig,
 }
 
 #[derive(Deserialize)]

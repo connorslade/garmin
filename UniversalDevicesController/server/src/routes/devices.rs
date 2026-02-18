@@ -44,7 +44,7 @@ impl Node {
 }
 
 pub async fn get(State(app): State<Arc<App>>) -> AnyResult<Json<Vec<Device>>> {
-    let nodes = app.request::<Nodes>("rest/nodes/devices").await?.node;
+    let nodes = app.request::<Nodes>("/rest/nodes/devices").await?.node;
     let devices = nodes.into_iter().filter_map(|x| x.into_device()).collect();
     Ok(Json(devices))
 }

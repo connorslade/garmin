@@ -5,6 +5,10 @@ using Toybox.WatchUi;
 class Set {
     var inner = {};
 
+    function size() as Number {
+        return self.inner.size();
+    }
+
     function insert(value as Object) {
         self.inner.put(value, null);
     }
